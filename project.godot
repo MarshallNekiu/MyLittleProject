@@ -14,6 +14,16 @@ config/name="MyLittleProject"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=768
+window/stretch/mode="viewport"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/SimpleTODO/plugin.cfg", "res://addons/indent_guidelines/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://bjrpt87rwsd0w"]
+
+[ext_resource type="Script" uid="uid://c8dfe7wcsnoiq" path="res://script/main.gd" id="1_itxqv"]
+[ext_resource type="Texture2D" uid="uid://burgxl2tjeyvk" path="res://res/tex/grid.png" id="2_v0l8b"]
+
+[sub_resource type="Shader" id="Shader_v0l8b"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.4.1.stable's CanvasItemMaterial.
+
+shader_type canvas_item;
+render_mode blend_mix;
+
+uniform float scale = 0.5;
+uniform vec2 offset = vec2(0.0);
+
+void vertex() {
+	UV = (UV + offset) * scale;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wp4xf"]
+shader = SubResource("Shader_v0l8b")
+shader_parameter/scale = 0.5
+shader_parameter/offset = Vector2(0, 0)
+
+[node name="Main" type="Node"]
+script = ExtResource("1_itxqv")
+
+[node name="CamLayer" type="CanvasLayer" parent="."]
+
+[node name="BGColor" type="ColorRect" parent="CamLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Grid" type="TextureRect" parent="CamLayer"]
+self_modulate = Color(1, 1, 1, 0.5)
+texture_filter = 1
+material = SubResource("ShaderMaterial_wp4xf")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_v0l8b")
+stretch_mode = 1
