@@ -23,7 +23,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/SimpleTODO/plugin.cfg", "res://addons/indent_guidelines/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+enabled=PackedStringArray("res://addons/SimpleTODO/plugin.cfg", "res://addons/indent_guidelines/plugin.cfg", "res://addons/script-ide/plugin.cfg", "res://addons/script_spliter/plugin.cfg")
 
 [rendering]
 
