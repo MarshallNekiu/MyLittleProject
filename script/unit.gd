@@ -1,25 +1,35 @@
 class_name Unit
-extends Node
+extends Node2D
 
-var size: Vector2:
-	set(x): __rectNode.size = x
-	get: return __rectNode.size
+static var focused: Unit
 
 var __class: String = ""
-
-var __rectNode: ReferenceRect = ReferenceRect.new()
+var __rid: int = rid_allocate_id()
 
 
 func _init(_class: String) -> void:
 	__class = _class
-	
-	__rectNode.border_color = Color.YELLOW
-	__rectNode.border_width = 1.0
-	__rectNode.editor_only = false
-	__rectNode.size = Vector2(64, 64)
-	__rectNode.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
-	add_child(__rectNode)
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		var localEvent: InputEventScreenTouch = make_input_local(event)
+		if event.is_pressed():
+			if Rect2(Vector2.ZERO, Vector2(64, 64)).has_point(localEvent.position):
+				focused = self
+
+
+func _process(delta: float) -> void:
+	queue_redraw()
+
+
+func _draw() -> void:
+	draw_rect(Rect2(Vector2(0, 0), Vector2(64, 64)), Color.YELLOW, false, 2)
+
+
+func move(_vector: Vector2, _step: int) -> void:
+	for i in _step:
+		await create_tween().tween_property(self, "position", (position + _vector * 64) / (Vector2(64, 64)).round() * 64, 0.05).finished
 
 
 func getClass() -> String: return __class

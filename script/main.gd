@@ -1,61 +1,77 @@
-extends Node
+extends Node2D
 
-var size: Vector2:
-	set(x): __rectNode.size = x
-	get: return __rectNode.size
+static var __mouse: Vector2
 
-var __fields: Array[Field]
-var __focus: Field
-
-var __rectNode: ReferenceRect = ReferenceRect.new()
-var __fieldsNode: Node2D = Node2D.new()
+var __unitTest: Unit = Unit.new("normal")
+var __debug: Dictionary
 
 
 func _init() -> void:
-	attachField("normal")
-	attachTeam(0, "player")
-	attachUnit(0, 0, "normal")
-	
-	__rectNode.border_color = Color.RED
-	__rectNode.border_width = 8.0
-	__rectNode.editor_only = false
-	__rectNode.size = Vector2(1280, 768)
-	__rectNode.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
-	add_child(__rectNode)
-	add_child(__fieldsNode)
+	add_child(__unitTest)
 
 
 func _ready() -> void:
-	addField(0)
-	addTeam(0, 0)
-	addUnit(0, 0, 0)
+	setCameraPosition(Vector2.ZERO)
+	setCameraZoom(2.0)
 
 
 func _input(event: InputEvent) -> void:
-	pass
+	if event is InputEventScreenDrag:
+		__debug["mouse"] = event.position
+	elif event is InputEventScreenTouch:
+		__debug["mouse"] = getCameraPosition() + event.position * (1.0 / getCameraZoom())
+		if event.is_released():
+			var unit: Unit = Unit.focused
+			if is_instance_valid(unit):
+				var dir: Vector2 = unit.position.direction_to(__mouse)
+				var dis: float = unit.position.distance_to(__mouse)
+				var deg: int = absi(int(Vector2.UP.dot(dir) * 90))
+				var vector: Vector2 = dir
+				
+				if deg in [0, 63, 90]:
+					if deg == 63:
+						vector *= 1.41421
+					
+					unit.move(vector, roundi((dis if not deg == 63 else (dis / 1.41421)) / 64.0))
+				
+				Unit.focused = null
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
-		setCameraPosition(getCameraPosition() + event.relative)
+		var localEvent: InputEventScreenDrag = make_input_local(event)
+		if not is_instance_valid(Unit.focused):
+			setCameraPosition(getCameraPosition() - event.relative * (1.0 /getCameraZoom()))
+		else:
+			__mouse = (localEvent.position.clamp(Vector2.ZERO, Vector2(1280 - 32, 768 - 32)) / Vector2(64, 64)).floor() * 64
+			__debug["dot"] = absi(int(Vector2.UP.dot(__mouse.direction_to(Unit.focused.position)) * 90))
 
 
 func _process(delta: float) -> void:
-	$DebugLayer/Label.text = str(
-		getCameraPosition(), "\n",
-		"zoom: ", getCameraZoom(), "\n",
-		"fields: ", __fields.size()
-	)
+	var toDebug: String = str(delta, "\n")
+	for _key in __debug:
+		toDebug += str(_key, ": ", __debug[_key], "\n")
+	$DBLayer/Label.text = toDebug
+	
+	queue_redraw()
 
 
-func _physics_process(delta: float) -> void:
-	pass
+func _draw() -> void:
+	draw_rect(Rect2(Vector2(0, 0), Vector2(1280, 768)), Color.RED, false, 8)
+	var unit: Unit = Unit.focused
+	if is_instance_valid(unit):
+		draw_rect(Rect2(unit.position + Vector2(24, 24), Vector2(16, 16)), Color.VIOLET, true, 4.0)
+		if absi(int(Vector2.UP.dot(__mouse.direction_to(Unit.focused.position)) * 90)) in [0, 63, 90]:
+			draw_rect(Rect2(__mouse + Vector2(24, 24), Vector2(16, 16)), Color.VIOLET, true, 4.0)
+			draw_line(unit.position + Vector2(32, 32), __mouse + Vector2(32, 32), Color.VIOLET, 2.0)
+		
 
 
 func setCameraZoom(_zoom: float) -> void:
 	$Camera.zoom = Vector2(_zoom, _zoom)
-	$CamLayer/Grid.material.set_shader_parameter("zoom", _zoom)
+	$BGLayer/Grid.material.set_shader_parameter("zoom", _zoom)
+	
+	__debug["zoom"] = _zoom
 
 
 func getCameraZoom() -> float:
@@ -63,48 +79,13 @@ func getCameraZoom() -> float:
 
 
 func setCameraPosition(_position: Vector2) -> void:
-	var grid: ShaderMaterial = $CamLayer/Grid.material
+	var grid: ShaderMaterial = $BGLayer/Grid.material
 	
 	$Camera.position = _position
 	grid.set_shader_parameter("offset", _position)
+	
+	__debug["pos"] = _position
 
 
 func getCameraPosition() -> Vector2:
 	return $Camera.position
-
-
-func __newField(_class: String) -> Field:
-	var field: Field = Field.new(_class)
-	return field
-
-
-func attachField(_class: String) -> void:
-	var field: Field = __newField(_class)
-	__fields.append(field)
-
-
-func attachTeam(_fIdx: int, _name: String) -> void:
-	__fields[_fIdx].attachTeam(_name)
-
-
-func attachUnit(_fidx: int, _tIdx: int, _class) -> void:
-	__fields[_fidx].attachUnit(_tIdx, _class)
-
-
-func addField(idx: int) -> void:
-	var field: Field = __fields[idx]
-	__rectNode.add_child(field)
-
-
-func addTeam(_fIdx: int, _tIdx: int) -> void:
-	__fields[_fIdx].addTeam(_tIdx)
-
-
-func addUnit(_fidx: int, _tIdx: int, _uIdx: int) -> void:
-	__fields[_fidx].addUnit(_tIdx, _uIdx)
-
-
-func focusField(idx: int) -> void:
-	if is_instance_valid(__focus):
-		pass
-	__focus = __fields[idx]
