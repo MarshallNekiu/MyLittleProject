@@ -4,7 +4,7 @@ extends Node2D
 static var focused: Unit
 
 var __class: String = ""
-var __rid: int = rid_allocate_id()
+#var __rid: int = rid_allocate_id()
 
 
 func _init(_class: String) -> void:
@@ -19,17 +19,17 @@ func _input(event: InputEvent) -> void:
 				focused = self
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	queue_redraw()
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2(0, 0), Vector2(64, 64)), Color.YELLOW, false, 2)
+	draw_rect(Rect2(Vector2(8, 8), Vector2(64 - 16, 64 - 16)), Color.YELLOW, false, 2)
 
 
 func move(_vector: Vector2, _step: int) -> void:
 	for i in _step:
-		await create_tween().tween_property(self, "position", (position + _vector * 64) / (Vector2(64, 64)).round() * 64, 0.05).finished
+		await create_tween().tween_property(self, "position", (position + _vector * 64) / (Vector2(64, 64)).round() * 64, 0.02).finished
 
 
 func getClass() -> String: return __class
