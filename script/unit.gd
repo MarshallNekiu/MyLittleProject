@@ -1,22 +1,21 @@
 class_name Unit
 extends Node2D
 
+enum STATE{IDLE, MOVING}
+
 static var focused: Unit
 
-var __class: String = ""
-#var __rid: int = rid_allocate_id()
+var size: Vector2i = Vector2i(1, 1)
+
+var __type: String = ""
+var __state: STATE = STATE.IDLE
+var __rid: int = rid_allocate_id()
 
 
-func _init(_class: String) -> void:
-	__class = _class
-
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		var localEvent: InputEventScreenTouch = make_input_local(event)
-		if event.is_pressed():
-			if Rect2(Vector2.ZERO, Vector2(64, 64)).has_point(localEvent.position):
-				focused = self
+func _init(_type: String) -> void:
+	__type = _type
+	
+	add_to_group("unit")
 
 
 func _process(_delta: float) -> void:
@@ -24,12 +23,16 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2(8, 8), Vector2(64 - 16, 64 - 16)), Color.YELLOW, false, 2)
+	draw_rect(Rect2(Vector2(8, 8), size * 64 - Vector2i(16, 16)), Color.YELLOW, false, 4)
 
 
-func move(_vector: Vector2, _step: int) -> void:
+func move(_vector: Vector2, _step: int, _t: float = 0.02) -> void:
+	if not __state == STATE.IDLE:
+		return
+	__state = STATE.MOVING
 	for i in _step:
-		await create_tween().tween_property(self, "position", (position + _vector * 64) / (Vector2(64, 64)).round() * 64, 0.02).finished
+		await create_tween().tween_property(self, "position", (position + _vector * 64) / (Vector2(64, 64)).round() * 64, _t).finished
+	__state = STATE.IDLE
 
 
-func getClass() -> String: return __class
+func get_type() -> String: return __type

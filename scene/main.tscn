@@ -27,6 +27,7 @@ shader_parameter/zoom = 2.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_itxqv")
+metadata/_edit_vertical_guides_ = [-191.0, -116.0, -54.0]
 
 [node name="DBLayer" type="CanvasLayer" parent="."]
 
@@ -67,3 +68,18 @@ stretch_mode = 1
 anchor_mode = 0
 zoom = Vector2(2, 2)
 position_smoothing_speed = 20.0
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="Turn" type="Button" parent="UILayer"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.0
+offset_top = 16.0
+offset_right = 32.0
+offset_bottom = 80.0
+grow_horizontal = 2
+text = "0"
+
+[connection signal="pressed" from="UILayer/Turn" to="." method="_on_turn_pressed"]
